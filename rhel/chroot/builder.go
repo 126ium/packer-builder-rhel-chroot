@@ -127,9 +127,6 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	steps := []multistep.Step{
 		&StepPrepareOutputDir{},
 		&StepPrepareImage{},
-		&StepPrepareDevice{},
-		&StepConnectImage{},
-		&StepMountDevice{},
 		&StepMountExtra{},
 		&StepCopyFiles{},
 		&StepChrootProvision{},

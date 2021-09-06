@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/hashicorp/packer/packer/plugin"
-	"github.com/summerwind/packer-builder-qemu-chroot/qemu/chroot"
+	"github.com/insanemal/packer-builder-rhel-chroot/rhel/chroot"
 )
 
 func main() {
