@@ -19,18 +19,18 @@ func (s *StepPrepareOutputDir) Run(_ context.Context, state multistep.StateBag) 
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	if _, err := os.Stat(config.OutputDir); err == nil {
+	if _, err := os.Stat(config.MountPath); err == nil {
 		if !config.PackerForce {
-			err := fmt.Errorf("Output directory already exists: %s", config.OutputDir)
+			err := fmt.Errorf("Output directory already exists: %s", config.MountPath)
 			return halt(state, err)
 		}
 
 		ui.Say("Deleting previous output directory...")
-		os.RemoveAll(config.OutputDir)
+		os.RemoveAll(config.MountPath)
 	}
 
 	ui.Say("Creating output directory...")
-	if err := os.MkdirAll(config.OutputDir, 0755); err != nil {
+	if err := os.MkdirAll(config.MountPath, 0755); err != nil {
 		return halt(state, err)
 	}
 
@@ -53,7 +53,7 @@ func (s *StepPrepareOutputDir) Cleanup(state multistep.StateBag) {
 
 		ui.Say("Deleting output directory...")
 		for i := 0; i < 5; i++ {
-			err := os.RemoveAll(config.OutputDir)
+			err := os.RemoveAll(config.MountPath)
 			if err == nil {
 				break
 			}

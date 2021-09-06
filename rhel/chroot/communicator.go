@@ -63,7 +63,7 @@ func (c *Communicator) Upload(dst string, r io.Reader, fi *os.FileInfo) error {
 	dst = filepath.Join(c.Chroot, dst)
 	log.Printf("Uploading to chroot dir: %s", dst)
 
-	tf, err := ioutil.TempFile("", "packer-builder-qemu-chroot")
+	tf, err := ioutil.TempFile("", "packer-builder-rhel-chroot")
 	if err != nil {
 		return fmt.Errorf("Error preparing shell script: %s", err)
 	}

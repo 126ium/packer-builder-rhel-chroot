@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const BuilderId = "summerwind.qemu-chroot"
+const BuilderId = "insanemal.rhel-chroot"
 
 type Artifact struct {
 	dir   string

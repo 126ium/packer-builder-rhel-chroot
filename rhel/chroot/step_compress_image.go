@@ -26,6 +26,8 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 	ui.Say("Compressing image...")
 	tmpPath := imagePath + ".tmp"
 
+    // mksquashfs ${1} squashfs.img.TMP -comp xz -b 1048576 -Xbcj x86 -Xdict-size 100%
+
 	cmd := fmt.Sprintf("qemu-img convert -c -O qcow2 %s %s", imagePath, tmpPath)
 	cmd, err := cmdWrapper(cmd)
 	if err != nil {

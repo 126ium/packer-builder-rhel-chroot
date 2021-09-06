@@ -2,14 +2,17 @@ package chroot
 
 import (
 	"context"
+	"bytes"
 	"fmt"
 	"io"
 	"log"
+    "strings"
 	"os"
 	"path/filepath"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type StepPrepareImage struct {
@@ -20,49 +23,69 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
 
-	sourcePath, err := filepath.Abs(config.SourceImage)
+	sourcePath, err := filepath.Abs(config.SourceRPM)
 	if err != nil {
-		err := fmt.Errorf("Error checking source image: %s", err)
+		err := fmt.Errorf("Error formatting source image path: %s", err)
 		return halt(state, err)
 	}
 
 	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
-		err := fmt.Errorf("Source image not found: %s", sourcePath)
+		err := fmt.Errorf("Source RPM not found: %s", sourcePath)
 		return halt(state, err)
 	}
 
-	log.Printf("Source image path: %s", sourcePath)
-	ui.Say("Copying source image...")
+	log.Printf("Distro Release RPM: %s", sourcePath)
+	ui.Say("Inital Chroot setup...")
 
-	sourceFile, err := os.Open(sourcePath)
+	chrootDir := filepath.Abs(config.MountPath)
+
+	cmd := fmt.Sprintf("rpm --root %s --initdb", chrootDir)
+	cmd, err = cmdWrapper(cmd)
 	if err != nil {
-		err := fmt.Errorf("Error opening source image file: %s", err)
+		err := fmt.Errorf("Error formating RPM command: %s", err)
+		return halt(state, err)
+	 }
+
+	shell := NewShellCommand(cmd)
+	shell.Stderr = new(bytes.Buffer)
+	if err := shell.Run(); err != nil {
+		err := fmt.Errorf("Error running rpm to init DB: %s\n%s", err, shell.Stderr)
 		return halt(state, err)
 	}
 
-	imagePath := filepath.Join(config.OutputDir, config.ImageName)
-	imageFile, err := os.OpenFile(imagePath, os.O_RDWR|os.O_CREATE, 0644)
+	RPMList := strings.Join(config.BaseRPMS, " ")
+	cmd := fmt.Sprintf("rpm --root %s -ihv %s", chrootDir, RPMList)
+	cmd, err = cmdWrapper(cmd)
 	if err != nil {
-		err := fmt.Errorf("Error opening image file: %s", err)
+		err := fmt.Errorf("Error formating RPM command: %s", err)
+		return halt(state, err)
+	 }
+
+	shell := NewShellCommand(cmd)
+	shell.Stderr = new(bytes.Buffer)
+	if err := shell.Run(); err != nil {
+		err := fmt.Errorf("Error running rpm to init DB: %s\n%s", sourcePath, err)
 		return halt(state, err)
 	}
 
-	_, err = io.Copy(imageFile, sourceFile)
+	cmd := fmt.Sprintf("yum install -u --installroot=%s yum", chrootDir)
+	cmd, err = cmdWrapper(cmd)
 	if err != nil {
-		err := fmt.Errorf("Error copying source image file: %s", err)
+		err := fmt.Errorf("Error formating Yum command: %s", err)
+		return halt(state, err)
+	 }
+
+	shell := NewShellCommand(cmd)
+	shell.Stderr = new(bytes.Buffer)
+	if err := shell.Run(); err != nil {
+		err := fmt.Errorf("Error installing Yum: %s", err)
 		return halt(state, err)
 	}
 
-	err = imageFile.Sync()
-	if err != nil {
-		err := fmt.Errorf("Error syncing image file: %s", err)
-		return halt(state, err)
-	}
 
-	s.imagePath = imageFile.Name()
-	state.Put("image_path", imageFile.Name())
 
 	return multistep.ActionContinue
 }
 
 func (s *StepPrepareImage) Cleanup(state multistep.StateBag) {}
+
