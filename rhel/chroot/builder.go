@@ -101,9 +101,6 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	var errs *packer.MultiError
 	var warns []string
 
-	if b.config.SourceRPM == "" {
-		errs = packer.MultiErrorAppend(errs, errors.New("source_rpm is required."))
-	}
 
 	if errs != nil && len(errs.Errors) > 0 {
 		return warns, errs

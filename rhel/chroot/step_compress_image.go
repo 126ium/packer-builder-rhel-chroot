@@ -18,17 +18,15 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 	ui := state.Get("ui").(packer.Ui)
 	imagePath := state.Get("image_path").(string)
 	cmdWrapper := state.Get("command_wrapper").(CommandWrapper)
-
-	if !config.Compression {
-		return multistep.ActionContinue
-	}
+	outputPath := state.Get("output_directory").(string)
+	imageName := state.Get("image_name").(string)
+	mountPath := state.Get("mount_path").(string)
 
 	ui.Say("Compressing image...")
-	tmpPath := imagePath + ".tmp"
 
     // mksquashfs ${1} squashfs.img.TMP -comp xz -b 1048576 -Xbcj x86 -Xdict-size 100%
 
-	cmd := fmt.Sprintf("qemu-img convert -c -O qcow2 %s %s", imagePath, tmpPath)
+	cmd := fmt.Sprintf("mksquasfs %s %s -comp xz -b 1048576 -Xbcj x86 -Xdict-size 100%", mountPath, imageName)
 	cmd, err := cmdWrapper(cmd)
 	if err != nil {
 		err := fmt.Errorf("Error creating compression command: %s", err)
@@ -44,10 +42,6 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 		return halt(state, err)
 	}
 
-	if err := os.Rename(tmpPath, imagePath); err != nil {
-		err := fmt.Errorf("Error renaming image: %s", err)
-		return halt(state, err)
-	}
 
 	return multistep.ActionContinue
 }

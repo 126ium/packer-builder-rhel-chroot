@@ -64,7 +64,7 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 		return halt(state, err)
 	 }
 
-	shell h= NewShellCommand(cmd)
+	shell = NewShellCommand(cmd)
 	shell.Stderr = new(bytes.Buffer)
 	if err := shell.Run(); err != nil {
 		err := fmt.Errorf("Error installing Yum: %s", err)
