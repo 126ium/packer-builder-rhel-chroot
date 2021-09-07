@@ -4,15 +4,11 @@ import (
 	"context"
 	"bytes"
 	"fmt"
-	"io"
-	"log"
     "strings"
-	"os"
 	"path/filepath"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
 )
 
 type StepPrepareImage struct {
@@ -22,22 +18,15 @@ type StepPrepareImage struct {
 func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
 	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
+	cmdWrapper := state.Get("command_wrapper").(CommandWrapper)
 
-	sourcePath, err := filepath.Abs(config.SourceRPM)
-	if err != nil {
-		err := fmt.Errorf("Error formatting source image path: %s", err)
-		return halt(state, err)
-	}
-
-	if _, err := os.Stat(sourcePath); os.IsNotExist(err) {
-		err := fmt.Errorf("Source RPM not found: %s", sourcePath)
-		return halt(state, err)
-	}
-
-	log.Printf("Distro Release RPM: %s", sourcePath)
 	ui.Say("Inital Chroot setup...")
 
-	chrootDir := filepath.Abs(config.MountPath)
+	chrootDir, err := filepath.Abs(config.MountPath)
+	if err != nil {
+		err := fmt.Errorf("Error formating MountPath command: %s", err)
+		return halt(state, err)
+	 }
 
 	cmd := fmt.Sprintf("rpm --root %s --initdb", chrootDir)
 	cmd, err = cmdWrapper(cmd)

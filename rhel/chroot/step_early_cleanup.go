@@ -14,8 +14,6 @@ func (s *StepEarlyCleanup) Run(_ context.Context, state multistep.StateBag) mult
 	keys := []string{
 		"copy_files_cleanup",
 		"mount_extra_cleanup",
-		"mount_device_cleanup",
-		"connect_image_cleanup",
 	}
 
 	for _, key := range keys {
