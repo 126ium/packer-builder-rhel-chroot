@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/hashicorp/packer/helper/multistep"
 	"github.com/hashicorp/packer/packer"
@@ -14,11 +13,8 @@ import (
 type StepCompressImage struct{}
 
 func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
-	config := state.Get("config").(*Config)
 	ui := state.Get("ui").(packer.Ui)
-	imagePath := state.Get("image_path").(string)
 	cmdWrapper := state.Get("command_wrapper").(CommandWrapper)
-	outputPath := state.Get("output_directory").(string)
 	imageName := state.Get("image_name").(string)
 	mountPath := state.Get("mount_path").(string)
 
@@ -26,7 +22,8 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 
     // mksquashfs ${1} squashfs.img.TMP -comp xz -b 1048576 -Xbcj x86 -Xdict-size 100%
 
-	cmd := fmt.Sprintf("mksquasfs %s %s -comp xz -b 1048576 -Xbcj x86 -Xdict-size 100%", mountPath, imageName)
+	cmd := fmt.Sprintf("mksquashfs %s %s -comp xz -b 1048576 -Xbcj x86 -Xdict-size 100%%", mountPath, imageName)
+	ui.Say(cmd)
 	cmd, err := cmdWrapper(cmd)
 	if err != nil {
 		err := fmt.Errorf("Error creating compression command: %s", err)

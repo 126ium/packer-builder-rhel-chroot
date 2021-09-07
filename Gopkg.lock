@@ -106,14 +106,6 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:56257bf7cab727d104c15ac2fa4afe6a2a3fe7a688e6a2f2d3c93a4b184ed37f"
-  name = "github.com/mitchellh/multistep"
-  packages = ["."]
-  pruneopts = ""
-  revision = "391576a156a54cfbb4cf5d5eda40cf6ffa3e3a4d"
-
-[[projects]]
   digest = "1:5584c8fba4fbaac85a65c9b86320fdfb6fdd5ce86b3f8fd7ddb5082d20567bd3"
   name = "github.com/mitchellh/reflectwalk"
   packages = ["."]
@@ -135,10 +127,10 @@
   input-imports = [
     "github.com/hashicorp/packer/common",
     "github.com/hashicorp/packer/helper/config",
+    "github.com/hashicorp/packer/helper/multistep",
     "github.com/hashicorp/packer/packer",
     "github.com/hashicorp/packer/packer/plugin",
     "github.com/hashicorp/packer/template/interpolate",
-    "github.com/mitchellh/multistep",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

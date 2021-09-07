@@ -57,7 +57,7 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 		return halt(state, err)
 	}
 
-	cmd = fmt.Sprintf("yum install -u --installroot=%s yum", chrootDir)
+	cmd = fmt.Sprintf("yum install -y --installroot=%s yum", chrootDir)
 	cmd, err = cmdWrapper(cmd)
 	if err != nil {
 		err := fmt.Errorf("Error formating Yum command: %s", err)
@@ -71,7 +71,12 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 		return halt(state, err)
 	}
 
+	ui.Say("I think it wworked...")
 
+	s.imagePath = config.ImageName
+	state.Put("mount_path", chrootDir)
+	state.Put("image_name", config.ImageName)
+	state.Put("image_path", config.OutputDir)
 
 	return multistep.ActionContinue
 }

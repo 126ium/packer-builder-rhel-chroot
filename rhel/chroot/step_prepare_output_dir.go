@@ -40,16 +40,21 @@ func (s *StepPrepareOutputDir) Run(_ context.Context, state multistep.StateBag) 
 }
 
 func (s *StepPrepareOutputDir) Cleanup(state multistep.StateBag) {
-	if !s.success {
-		return
-	}
+	ui := state.Get("ui").(packer.Ui)
+	ui.Say("Got here in cleanup")
 
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
 
+
+	if !cancelled || !halted {
+		ui.Say("Ok lets return from cleanup")
+		return 
+	}
+
+
 	if cancelled || halted {
 		config := state.Get("config").(*Config)
-		ui := state.Get("ui").(packer.Ui)
 
 		ui.Say("Deleting output directory...")
 		for i := 0; i < 5; i++ {
