@@ -53,7 +53,7 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 	shell = NewShellCommand(cmd)
 	shell.Stderr = new(bytes.Buffer)
 	if err := shell.Run(); err != nil {
-		err := fmt.Errorf("Error running rpm to init DB: %s\n%s", sourcePath, err)
+		err := fmt.Errorf("Error running rpm to init DB: %s", err)
 		return halt(state, err)
 	}
 

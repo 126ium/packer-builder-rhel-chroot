@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os/exec"
 	"runtime"
 
 	"github.com/hashicorp/packer/common"
