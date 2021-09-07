@@ -54,28 +54,28 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 	}
 
 	RPMList := strings.Join(config.BaseRPMS, " ")
-	cmd := fmt.Sprintf("rpm --root %s -ihv %s", chrootDir, RPMList)
+	cmd = fmt.Sprintf("rpm --root %s -ihv %s", chrootDir, RPMList)
 	cmd, err = cmdWrapper(cmd)
 	if err != nil {
 		err := fmt.Errorf("Error formating RPM command: %s", err)
 		return halt(state, err)
 	 }
 
-	shell := NewShellCommand(cmd)
+	shell = NewShellCommand(cmd)
 	shell.Stderr = new(bytes.Buffer)
 	if err := shell.Run(); err != nil {
 		err := fmt.Errorf("Error running rpm to init DB: %s\n%s", sourcePath, err)
 		return halt(state, err)
 	}
 
-	cmd := fmt.Sprintf("yum install -u --installroot=%s yum", chrootDir)
+	cmd = fmt.Sprintf("yum install -u --installroot=%s yum", chrootDir)
 	cmd, err = cmdWrapper(cmd)
 	if err != nil {
 		err := fmt.Errorf("Error formating Yum command: %s", err)
 		return halt(state, err)
 	 }
 
-	shell := NewShellCommand(cmd)
+	shell h= NewShellCommand(cmd)
 	shell.Stderr = new(bytes.Buffer)
 	if err := shell.Run(); err != nil {
 		err := fmt.Errorf("Error installing Yum: %s", err)
