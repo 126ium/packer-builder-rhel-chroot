@@ -28,13 +28,13 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 			ui.Message(fmt.Sprintf("Copying: %s", srcPath))
 
 			cmd := fmt.Sprintf("cp -r %s %s", srcPath, outputDir)
-			cmd, err := cmdWrrapper(cmd)
+			cmd, err := cmdWrapper(cmd)
 			if err != nil {
-				err := fmt.Errorrf("Errorr creating copy command: %s", errr)
-				return halt(state, errr)
+				err := fmt.Errorf("Errorr creating copy command: %s", err)
+				return halt(state, err)
 			}
 
-			ui.Say("Copy command: %s", cmd)
+			ui.Say(fmt.Sprintf("Copy command: %s", cmd))
 
 			shell := NewShellCommand(cmd)
 			shell.Stderr = new(bytes.Buffer)

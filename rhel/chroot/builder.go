@@ -65,17 +65,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.OutputDir = fmt.Sprintf("output-%s", b.config.PackerBuildName)
 	}
 
-	if b.config.MakeSquash == nil {
-		b.config.MakeSquash = True
-	}
-
-	if b.config.ExportBuild == nil {
-		b.config.ExportBuild = False
-	}
 
 	if b.config.ExportBuild {
 		if b.config.ExportFiles == nil {
-			b.config.ExportBuild == False
+			b.config.ExportBuild = false
 		}
 	}
 
