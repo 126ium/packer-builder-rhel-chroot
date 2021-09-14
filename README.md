@@ -1,22 +1,19 @@
-# QEMU chroot builder for Packer
+# RHEL chroot builder for Packer
 
-A builder plugin of Packer to support building QEMU images within chroot.
+A builder plugin of Packer to support building RHEL (or other Yum based distros) within chroot.
 
 ## Prerequirements
 
 This plugin depends on the following tools:
 
 - Packer
-- QEMU Utilities (`qemu-nbd` and `qemu-img`)
-- NBD kernel module
+- Release RPMS required to allow install of yum/dnf
+- Build node running the same distro as will be running in the Chroot
 
 ## Install
 
 Download the binary from the [Releases](https://github.com/summerwind/packer-builder-qemu-chroot/releases) page and place it in one of the following places:
 
-- The directory where packer is, or the executable directory
-- `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d/plugins` on Windows
-- The current working directory
 
 ## Building plugin
 
@@ -26,21 +23,24 @@ To build the binary you need to install [Go](https://golang.org/), [dep](https:/
 $ task vendor
 $ task build
 ```
+Copy the resulting binary:
+- The directory where packer is, or the executable directory
+- `~/.packer.d/plugins` on Unix systems or `%APPDATA%/packer.d/plugins` on Windows
+- The current working directory
 
 ## How does it work?
 
-This plugin mounts the specified QCOW2 format image to the file system using the `qemu-nbd` command. Once mounted, a `chroot` command is used to provision the system within the image. After provisioning, the image is unmounted and save it as the QCOW2 format.
-
-Using this process eliminates the need to start the virtual machine, so you can provision the image faster.
+This plugin creates a chroot and either compresses it with squashfs or extracts files from it. Making it usable in automated build processes
 
 ## Quick Start
 
-To use this plugin, you need to load the NBD kernel module first. Note that this process must be executed on a Linux.
+To use this plugin, you need to download the approprate rpms to kick off the chroot build.
 
-```
-$ sudo modprobe nbd
-```
-
+eg. with Rocky 8.4
+- rocky-release-8.4-32.el8.noarch.rpm
+- rocky-gpg-keys-8.4-32.el8.noarch.rpm
+- rocky-repos-8.4-32.el8.noarch.rpm
+ 
 Prepare the following template file.
 
 ```
@@ -51,17 +51,17 @@ $ vim template.json
 {
   "builders": [
     {
-      "type": "qemu-chroot",
-      "source_path": "ubuntu-16.04-server-cloudimg-amd64-disk1.img",
-      "image_name": "ubuntu-16.04.img",
-      "compression": true
+      "type": "rhel-chroot",
+      "base_rpms": ["rocky-gpg-keys-8.4-32.el8.noarch.rpm ", "rocky-release-8.4-32.el8.noarch.rpm", "rocky-repos-8.4-32.el8.noarch.rpm"],
+      "mount_path": "/tmp/rocky_chroot",
+      "image_name": "/root/build.img"
     }
   ],
   "provisioners": [
     {
       "type": "shell",
       "inline": [
-        "apt update"
+        "yum -y update"
       ]
     }
   ] 
@@ -78,7 +78,8 @@ $ sudo packer build template.json
 
 ### Required
 
-- `source_image` (string) - A path to the base image file to use. This file must be in QCOW2 format.
+- `base_rpms` (string) - A List of rpms in the source root to use to start the chroot preperation.
+- `mount_path` (string) - Path to mount the chroot at. This will remain after the squashfs/build products are created or not created.
 
 ### Optional
 
@@ -125,5 +126,6 @@ These default mounts are usually good enough for anyone and are sane defaults. H
 
 Mozilla Public License 2.0
 
-Note that this plugin is implemented by forking [AMI Builder (chroot)](https://www.packer.io/docs/builders/amazon-chroot.html) of Packer.
+Note that this plugin is implemented by forking [QEMU chroot builder for Packer](https://github.com/summerwind/packer-builder-qemu-chroot) of Packer.
+Which was implemented by forking [AMI Builder (chroot)](https://www.packer.io/docs/builders/amazon-chroot.html) of Packer.
 
