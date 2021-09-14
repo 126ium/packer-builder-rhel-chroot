@@ -25,8 +25,11 @@ type Config struct {
 	BaseRPMS       []string   `mapstructure:"base_rpms"`
 	ChrootMounts   [][]string `mapstructure:"chroot_mounts"`
 	CopyFiles      []string   `mapstructure:"copy_files"`
+	ExportFiles    []string   `mapstructure:"export_files"`
 	CommandWrapper string     `mapstructure:"command_wrapper"`
 	InitChroot     bool       `mapstructure:"init_chroot"`
+	MakeSquash     bool       `mapstructure:"make_squash"`
+	ExportBuild    bool       `mapstructure:"export_build"`
 
 
 	ctx interpolate.Context
@@ -60,6 +63,20 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.OutputDir == "" {
 		b.config.OutputDir = fmt.Sprintf("output-%s", b.config.PackerBuildName)
+	}
+
+	if b.config.MakeSquash == nil {
+		b.config.MakeSquash = True
+	}
+
+	if b.config.ExportBuild == nil {
+		b.config.ExportBuild = False
+	}
+
+	if b.config.ExportBuild {
+		if b.config.ExportFiles == nil {
+			b.config.ExportBuild == False
+		}
 	}
 
 	if b.config.ImageName == "" {
