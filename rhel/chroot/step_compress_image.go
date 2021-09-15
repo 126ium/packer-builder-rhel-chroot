@@ -24,10 +24,11 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 	if config.ExportBuild {
 		for _, srcChroot := range config.ExportFiles {
 			srcPath := filepath.Join(mountPath,srcChroot)
+			dstPath := filepath.Join(outputDir,image_name)
 
 			ui.Message(fmt.Sprintf("Copying: %s", srcPath))
 
-			cmd := fmt.Sprintf("cp -r %s %s", srcPath, outputDir)
+			cmd := fmt.Sprintf("cp -r %s %s", srcPath, dstPath)
 			cmd, err := cmdWrapper(cmd)
 			if err != nil {
 				err := fmt.Errorf("Errorr creating copy command: %s", err)
