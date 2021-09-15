@@ -24,7 +24,7 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 	if config.ExportBuild {
 		for _, srcChroot := range config.ExportFiles {
 			srcPath := filepath.Join(mountPath,srcChroot)
-			dstPath := filepath.Join(outputDir,image_name)
+			dstPath := filepath.Join(outputDir,imageName)
 
 			ui.Message(fmt.Sprintf("Copying: %s", srcPath))
 
