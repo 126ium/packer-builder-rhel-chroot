@@ -18,18 +18,35 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 	config := state.Get("config").(*Config)
 	cmdWrapper := state.Get("command_wrapper").(CommandWrapper)
 	imageName := state.Get("image_name").(string)
+	exportFolder := config.ExportFolder
 	mountPath := state.Get("mount_path").(string)
 	outputDir := config.OutputDir
 
 	if config.ExportBuild {
 		for _, srcChroot := range config.ExportFiles {
-			srcPath := filepath.Join(mountPath,srcChroot)
-			dstPath := filepath.Join(outputDir,imageName)
+			srcPath := filepath.Join(mountPath,srcChroot[0])
+			dstPath_tmp := filepath.Join(outputDir,exportFolder)
+			dstPath := filepath.Join(dstPath_tmp, srcChroot[1])
+
+			cmd := fmt.Sprintf("mkdir -p %s", dstPath)
+			cmd, err := cmdWrapper(cmd)
+			if err != nil {
+				err := fmt.Errorf("Error prepairing mkdir directory: %s", err)
+				return halt(state, err)
+			}
+
+			shell := NewShellCommand(cmd)
+			shell.Stderr = new(bytes.Buffer)
+			if err := shell.Run(); err != nil {
+				err := fmt.Errorf("Error creating folder: %s\n%s", err, shell.Stderr)
+				return halt(state, err)
+			}
+
 
 			ui.Message(fmt.Sprintf("Copying: %s", srcPath))
 
-			cmd := fmt.Sprintf("cp -r %s %s", srcPath, dstPath)
-			cmd, err := cmdWrapper(cmd)
+			cmd = fmt.Sprintf("cp -r %s %s", srcPath, dstPath)
+			cmd, err = cmdWrapper(cmd)
 			if err != nil {
 				err := fmt.Errorf("Errorr creating copy command: %s", err)
 				return halt(state, err)
@@ -37,7 +54,7 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 
 			ui.Say(fmt.Sprintf("Copy command: %s", cmd))
 
-			shell := NewShellCommand(cmd)
+			shell = NewShellCommand(cmd)
 			shell.Stderr = new(bytes.Buffer)
 			if err := shell.Run(); err != nil {
 				err := fmt.Errorf("Error copying file/s: %s\n%s", err, shell.Stderr)

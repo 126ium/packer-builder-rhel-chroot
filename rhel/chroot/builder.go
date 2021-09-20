@@ -21,15 +21,19 @@ type Config struct {
 	WorkDir        string     `mapstructure:"tmp_directory"`
 	ImageName      string     `mapstructure:"image_name"`
 	MountPath      string     `mapstructure:"mount_path"`
+	ExportFolder   string     `mapstructure:"export_folder"`
 	MountOptions   []string   `mapstructure:"mount_options"`
 	BaseRPMS       []string   `mapstructure:"base_rpms"`
 	ChrootMounts   [][]string `mapstructure:"chroot_mounts"`
 	CopyFiles      []string   `mapstructure:"copy_files"`
-	ExportFiles    []string   `mapstructure:"export_files"`
+	ExportFiles    [][]string `mapstructure:"export_files"`
 	CommandWrapper string     `mapstructure:"command_wrapper"`
 	InitChroot     bool       `mapstructure:"init_chroot"`
 	MakeSquash     bool       `mapstructure:"make_squash"`
 	ExportBuild    bool       `mapstructure:"export_build"`
+	NewImage       bool       `mapstructure:"new_image"`
+	DontRsync      bool       `mapstructure:"dont_rsync"`
+	BaseIamge      string     `mapstructure:"base_image"`
 
 
 	ctx interpolate.Context
@@ -65,6 +69,9 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 		b.config.OutputDir = fmt.Sprintf("output-%s", b.config.PackerBuildName)
 	}
 
+	if b.config.BaseIamge == "" {
+		b.config.NewImage = true
+	}
 
 	if b.config.ExportBuild {
 		if b.config.ExportFiles == nil {
@@ -78,6 +85,10 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 
 	if b.config.MountPath == "" {
 		b.config.MountPath = "/mnt/packer-builder-rhel-chroot/{{.ImageName}}"
+	}
+
+	if b.config.ExportFolder == "" {
+		b.config.ExportFolder = "export"
 	}
 
 	if b.config.ChrootMounts == nil {
