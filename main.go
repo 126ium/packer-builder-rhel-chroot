@@ -1,16 +1,18 @@
 package main
 
 import (
-	"github.com/hashicorp/packer/packer/plugin"
-	"github.com/insanemal/packer-builder-rhel-chroot/rhel/chroot"
+	"fmt"
+	"github.com/hashicorp/packer-plugin-sdk/plugin"
+	"os"
+	"packer-builder-rhel-chroot/rhel/chroot"
 )
 
 func main() {
-	server, err := plugin.Server()
+	pps := plugin.NewSet()
+	pps.RegisterBuilder("rhel-chroot", new(chroot.Builder))
+	err := pps.Run()
 	if err != nil {
-		panic(err)
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(1)
 	}
-
-	server.RegisterBuilder(chroot.NewBuilder())
-	server.Serve()
 }

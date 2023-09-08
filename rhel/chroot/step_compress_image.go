@@ -7,8 +7,8 @@ import (
 	"log"
 	"path/filepath"
 
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type StepCompressImage struct{}
@@ -24,8 +24,8 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 
 	if config.ExportBuild {
 		for _, srcChroot := range config.ExportFiles {
-			srcPath := filepath.Join(mountPath,srcChroot[0])
-			dstPath_tmp := filepath.Join(outputDir,exportFolder)
+			srcPath := filepath.Join(mountPath, srcChroot[0])
+			dstPath_tmp := filepath.Join(outputDir, exportFolder)
 			dstPath := filepath.Join(dstPath_tmp, srcChroot[1])
 
 			cmd := fmt.Sprintf("mkdir -p %s", dstPath)
@@ -41,7 +41,6 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 				err := fmt.Errorf("Error creating folder: %s\n%s", err, shell.Stderr)
 				return halt(state, err)
 			}
-
 
 			ui.Message(fmt.Sprintf("Copying: %s", srcPath))
 
@@ -63,10 +62,8 @@ func (s *StepCompressImage) Run(_ context.Context, state multistep.StateBag) mul
 		}
 	}
 
-
-	if  config.MakeSquash {
+	if config.MakeSquash {
 		ui.Say("Compressing image...")
-
 
 		cmd := fmt.Sprintf("mksquashfs %s %s -comp xz -b 1048576 -Xbcj x86 -Xdict-size 100%%", mountPath, imageName)
 		ui.Say(cmd)

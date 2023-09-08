@@ -1,16 +1,19 @@
+//go:generate packer-sdc mapstructure-to-hcl2 -type Config
 package chroot
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log"
 	"runtime"
 
-	"github.com/hashicorp/packer/common"
-	"github.com/hashicorp/packer/helper/config"
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
-	"github.com/hashicorp/packer/template/interpolate"
+	"github.com/hashicorp/hcl/v2/hcldec"
+	"github.com/hashicorp/packer-plugin-sdk/common"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/multistep/commonsteps"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
+	"github.com/hashicorp/packer-plugin-sdk/template/config"
+	"github.com/hashicorp/packer-plugin-sdk/template/interpolate"
 )
 
 // Config represents a configuration of builder.
@@ -35,7 +38,6 @@ type Config struct {
 	DontRsync      bool       `mapstructure:"dont_rsync"`
 	BaseIamge      string     `mapstructure:"base_image"`
 
-
 	ctx interpolate.Context
 }
 
@@ -50,19 +52,16 @@ type Builder struct {
 	runner multistep.Runner
 }
 
-// NewBuilder returns a Builder.
-func NewBuilder() *Builder {
-	return new(Builder)
-}
+func (b *Builder) ConfigSpec() hcldec.ObjectSpec { return b.config.FlatMapstructure().HCL2Spec() }
 
 // Prepare validates given configuration.
-func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
+func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	err := config.Decode(&b.config, &config.DecodeOpts{
 		Interpolate:        true,
 		InterpolateContext: &b.config.ctx,
 	}, raws...)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if b.config.OutputDir == "" {
@@ -121,18 +120,18 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, error) {
 	var errs *packer.MultiError
 	var warns []string
 
-
 	if errs != nil && len(errs.Errors) > 0 {
-		return warns, errs
+		return nil, warns, errs
 	}
 
-	return warns, nil
+	// Fix me
+	return nil, warns, nil
 }
 
 // Run runs each step of the plugin in order.
-func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packer.Artifact, error) {
+func (b *Builder) Run(ctx context.Context, ui packer.Ui, hook packer.Hook) (packer.Artifact, error) {
 	if runtime.GOOS != "linux" {
-		return nil, errors.New("The rhel-chroot builder only works on Linux environments.")
+		return nil, errors.New("the rhel-chroot builder only works on Linux environments")
 	}
 
 	state := new(multistep.BasicStateBag)
@@ -151,19 +150,19 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 		&StepCompressImage{},
 	}
 
-	b.runner = common.NewRunner(steps, b.config.PackerConfig, ui)
-	b.runner.Run(state)
+	b.runner = commonsteps.NewRunner(steps, b.config.PackerConfig, ui)
+	b.runner.Run(ctx, state)
 
 	if rawErr, ok := state.GetOk("error"); ok {
 		return nil, rawErr.(error)
 	}
 
 	if _, ok := state.GetOk(multistep.StateCancelled); ok {
-		return nil, errors.New("Build was cancelled.")
+		return nil, errors.New("build was cancelled")
 	}
 
 	if _, ok := state.GetOk(multistep.StateHalted); ok {
-		return nil, errors.New("Build was halted.")
+		return nil, errors.New("build was halted")
 	}
 
 	artifact := &Artifact{
@@ -174,12 +173,4 @@ func (b *Builder) Run(ui packer.Ui, hook packer.Hook, cache packer.Cache) (packe
 	}
 
 	return artifact, nil
-}
-
-// Cancel executes processing at cancel.
-func (b *Builder) Cancel() {
-	if b.runner != nil {
-		log.Println("Cancelling the step runner...")
-		b.runner.Cancel()
-	}
 }

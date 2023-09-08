@@ -4,13 +4,13 @@ import (
 	"context"
 	"log"
 
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type StepChrootProvision struct{}
 
-func (s *StepChrootProvision) Run(_ context.Context, state multistep.StateBag) multistep.StepAction {
+func (s *StepChrootProvision) Run(ctx context.Context, state multistep.StateBag) multistep.StepAction {
 	hook := state.Get("hook").(packer.Hook)
 	mountPath := state.Get("mount_path").(string)
 	ui := state.Get("ui").(packer.Ui)
@@ -22,7 +22,7 @@ func (s *StepChrootProvision) Run(_ context.Context, state multistep.StateBag) m
 	}
 
 	log.Println("Running the provision hook")
-	if err := hook.Run(packer.HookProvision, ui, comm, nil); err != nil {
+	if err := hook.Run(ctx, packer.HookProvision, ui, comm, nil); err != nil {
 		return halt(state, err)
 	}
 

@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-const BuilderId = "insanemal.rhel-chroot"
+const BuilderId = "126ium.rhel-chroot"
 
 type Artifact struct {
 	dir   string

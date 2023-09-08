@@ -1,14 +1,14 @@
 package chroot
 
 import (
-	"context"
 	"bytes"
+	"context"
 	"fmt"
-    "strings"
 	"path/filepath"
+	"strings"
 
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type StepPrepareImage struct {
@@ -28,14 +28,14 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 		if err != nil {
 			err := fmt.Errorf("Error formating MountPath command: %s", err)
 			return halt(state, err)
-		 }
+		}
 
 		cmd := fmt.Sprintf("rpm --root %s --initdb", chrootDir)
 		cmd, err = cmdWrapper(cmd)
 		if err != nil {
 			err := fmt.Errorf("Error formating RPM command: %s", err)
 			return halt(state, err)
-		 }
+		}
 
 		shell := NewShellCommand(cmd)
 		shell.Stderr = new(bytes.Buffer)
@@ -50,7 +50,7 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 		if err != nil {
 			err := fmt.Errorf("Error formating RPM command: %s", err)
 			return halt(state, err)
-		 }
+		}
 
 		shell = NewShellCommand(cmd)
 		shell.Stderr = new(bytes.Buffer)
@@ -64,7 +64,7 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 		if err != nil {
 			err := fmt.Errorf("Error formating Yum command: %s", err)
 			return halt(state, err)
-		 }
+		}
 
 		shell = NewShellCommand(cmd)
 		shell.Stderr = new(bytes.Buffer)
@@ -89,20 +89,20 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 		chrootDir, err := filepath.Abs(config.MountPath)
 		if err != nil {
 			err := fmt.Errorf("Error formatting MountPath command: %s", err)
-			return halt(state,err)
+			return halt(state, err)
 		}
 
 		sourceDir, err := filepath.Abs(config.BaseIamge)
 		if err != nil {
 			err := fmt.Errorf("Error formatting BaseImage command: %s", err)
-			return halt(state,err)
+			return halt(state, err)
 		}
 
-		srcDir,err := filepath.Abs(sourceDir) 
+		srcDir, err := filepath.Abs(sourceDir)
 		cmd := fmt.Sprintf("rsync -av %s/. %s", srcDir, chrootDir)
 		if err != nil {
 			err := fmt.Errorf("Error formatting rsync command: %s", err)
-			return halt(state,err)
+			return halt(state, err)
 		}
 		ui.Say(cmd)
 
@@ -111,7 +111,7 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 			shell.Stderr = new(bytes.Buffer)
 			if err := shell.Run(); err != nil {
 				err := fmt.Errorf("Error running rsync to clone image: %s\n%s", err, shell.Stderr)
-				return halt(state,err)
+				return halt(state, err)
 			}
 		} else {
 			ui.Say("Using existing iamge without rsync clone")
@@ -130,4 +130,3 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 }
 
 func (s *StepPrepareImage) Cleanup(state multistep.StateBag) {}
-

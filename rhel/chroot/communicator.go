@@ -2,6 +2,7 @@ package chroot
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,7 +13,7 @@ import (
 	"strings"
 	"syscall"
 
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 // Communicator is a special communicator that works by executing
@@ -22,7 +23,7 @@ type Communicator struct {
 	CmdWrapper CommandWrapper
 }
 
-func (c *Communicator) Start(rc *packer.RemoteCmd) error {
+func (c *Communicator) Start(ctx context.Context, rc *packer.RemoteCmd) error {
 	cmd := fmt.Sprintf("chroot %s /bin/sh -c \"%s\"", c.Chroot, rc.Command)
 	cmd, err := c.CmdWrapper(cmd)
 	if err != nil {

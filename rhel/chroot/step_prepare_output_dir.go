@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/hashicorp/packer/helper/multistep"
-	"github.com/hashicorp/packer/packer"
+	"github.com/hashicorp/packer-plugin-sdk/multistep"
+	"github.com/hashicorp/packer-plugin-sdk/packer"
 )
 
 type StepPrepareOutputDir struct {
@@ -38,7 +38,7 @@ func (s *StepPrepareOutputDir) Run(_ context.Context, state multistep.StateBag) 
 
 	if _, err := os.Stat(config.MountPath); err != nil {
 		err := fmt.Errorf("Output directory does not exits: %s", config.MountPath)
-		return halt(state,err)
+		return halt(state, err)
 	}
 
 	s.success = true
@@ -53,12 +53,10 @@ func (s *StepPrepareOutputDir) Cleanup(state multistep.StateBag) {
 	_, cancelled := state.GetOk(multistep.StateCancelled)
 	_, halted := state.GetOk(multistep.StateHalted)
 
-
 	if !cancelled || !halted {
 		ui.Say("Ok lets return from cleanup")
-		return 
+		return
 	}
-
 
 	if cancelled || halted {
 		config := state.Get("config").(*Config)
