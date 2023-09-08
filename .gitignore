@@ -1,5 +1,12 @@
-packer-builder-qemu-chroot
+packer-builder-rhel-chroot
 cover.out
 output-qemu-chroot/
 vendor/
 dist/
+*.iml
+*.ipr
+*.iws
+.idea/
+/build/
+/dist/
+/out/
