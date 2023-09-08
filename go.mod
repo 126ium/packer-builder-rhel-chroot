@@ -1,4 +1,4 @@
-module packer-builder-rhel-chroot
+module packer-plugin-rhel-chroot
 
 go 1.20
 

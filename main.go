@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/hashicorp/packer-plugin-sdk/plugin"
 	"os"
-	"packer-builder-rhel-chroot/rhel/chroot"
+	"packer-plugin-rhel-chroot/builder/rhel/chroot"
 )
 
 func main() {

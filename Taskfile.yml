@@ -1,7 +1,7 @@
 version: '3'
 
 vars:
-  NAME: packer-builder-rhel-chroot
+  NAME: packer-plugin-rhel-chroot
   VERSION: 1.2.0
   COMMIT: {sh: git rev-parse --verify HEAD}
   BUILD_FLAGS: -ldflags "-X main.VERSION={{.VERSION}} -X main.COMMIT={{.COMMIT}}"
