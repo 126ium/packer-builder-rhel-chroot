@@ -4,12 +4,17 @@ vars:
   NAME: packer-plugin-gdata
   VERSION: 1.2.0
   COMMIT: {sh: git rev-parse --verify HEAD}
-  BUILD_FLAGS: -ldflags "-X main.VERSION={{.VERSION}} -X main.COMMIT={{.COMMIT}}"
+  OS: linux
+  ARCH: amd64
+  BIN_NAME: packer-plugin-gdata_{{.VERSION}}_x5.0_{{.OS}}_{{.ARCH}}
+  OUTPUT_DIR: out
+  BUILD_FLAGS: -ldflags "-X main.VERSION={{.VERSION}} -X main.COMMIT={{.COMMIT}}" -o ./{{.OUTPUT_DIR}}/{{.BIN_NAME}}
 
 tasks:
   build:
     cmds:
-      - go build {{.BUILD_FLAGS}} .
+      - go build {{.BUILD_FLAGS}}
+      - cd {{.OUTPUT_DIR}} && sha256sum {{.BIN_NAME}} > {{.BIN_NAME}}_SHA256SUM
   test:
     cmds:
       - go vet ./...
@@ -23,15 +28,9 @@ tasks:
       - GOOS={{.OS}} GOARCH={{.ARCH}} go build {{.BUILD_FLAGS}} .
       - tar -czf dist/{{.NAME}}_{{.OS}}_{{.ARCH}}.tar.gz {{.NAME}}
       - rm -rf {{.NAME}}
-  dist:
-    deps: [test]
-    cmds:
-      - mkdir -p dist
-      - task: package
-        vars: {OS: "linux", ARCH: "amd64"}
   vendor:
     cmds:
       - dep ensure -v
   clean:
     cmds:
-      - rm -rf {{.NAME}} dist cover.out
+      - rm -rf {{.OUTPUT_DIR}} cover.out
