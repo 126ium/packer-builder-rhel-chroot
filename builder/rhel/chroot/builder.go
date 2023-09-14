@@ -83,7 +83,7 @@ func (b *Builder) Prepare(raws ...interface{}) ([]string, []string, error) {
 	}
 
 	if b.config.MountPath == "" {
-		b.config.MountPath = "/mnt/packer-builder-rhel-chroot/{{.ImageName}}"
+		b.config.MountPath = "/mnt/packer-plugin-gdata/{{.ImageName}}"
 	}
 
 	if b.config.ExportFolder == "" {

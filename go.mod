@@ -1,4 +1,4 @@
-module packer-plugin-rhel-chroot
+module packer-plugin-gdata
 
 go 1.20
 
