@@ -23,7 +23,7 @@ func (s *StepCopyFiles) Run(_ context.Context, state multistep.StateBag) multist
 
 	s.files = make([]string, 0, len(config.CopyFiles))
 
-	ui.Say("Copying files to withnin the chroot...")
+	ui.Say("Copying files to within the chroot...")
 	for _, srcPath := range config.CopyFiles {
 		destPath := filepath.Join(mountPath, srcPath)
 

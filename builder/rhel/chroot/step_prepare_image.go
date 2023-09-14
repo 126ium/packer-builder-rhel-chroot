@@ -22,7 +22,7 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 
 	if config.NewImage {
 
-		ui.Say("Inital Chroot setup...")
+		ui.Say("Initial Chroot setup...")
 
 		chrootDir, err := filepath.Abs(config.MountPath)
 		if err != nil {
@@ -73,7 +73,7 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 			return halt(state, err)
 		}
 
-		ui.Say("I think it wworked...")
+		ui.Say("I think it worked...")
 
 		s.imagePath = config.ImageName
 		state.Put("mount_path", chrootDir)
@@ -114,7 +114,7 @@ func (s *StepPrepareImage) Run(_ context.Context, state multistep.StateBag) mult
 				return halt(state, err)
 			}
 		} else {
-			ui.Say("Using existing iamge without rsync clone")
+			ui.Say("Using existing image without rsync clone")
 		}
 
 		ui.Say("I think it worked.....")
